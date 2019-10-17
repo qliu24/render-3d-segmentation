@@ -21,7 +21,7 @@ author: Qing Liu
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(BASE_DIR)
 
-bpy.ops.wm.addon_install(filepath='/mnt/1TB_SSD/qing/blender-off-addon/import_off.py')
+# bpy.ops.wm.addon_install(filepath='/mnt/1TB_SSD/qing/blender-off-addon/import_off.py')
 bpy.ops.wm.addon_enable(module='import_off')
 
 # Input parameters

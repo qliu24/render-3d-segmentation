@@ -12,12 +12,10 @@ RENDER_MODEL_VIEWS.py
 brief:
     render projections of a 3D model from viewpoints specified by an input parameter file
 usage:
-	blender blank.blend --background --python render_model_views.py -- <shape_obj_filename> <shape_category_synset> <shape_model_md5> <shape_view_param_file> <syn_img_output_folder>
+	blender blank.blend --background --python render_model_views.py -- <shape_obj_filename> <shape_view_param_file> <syn_img_output_folder>
 
 inputs:
        <shape_obj_filename>: .obj file of the 3D shape model
-       <shape_category_synset>: synset string like '03001627' (chairs)
-       <shape_model_md5>: md5 (as an ID) of the 3D shape model
        <shape_view_params_file>: txt file - each line is '<azimith angle> <elevation angle> <in-plane rotation angle> <distance>'
        <syn_img_output_folder>: output folder path for rendered images of this model
 
@@ -38,11 +36,10 @@ sys.path.append(BASE_DIR)
 import render_opt as opt
 
 # Input parameters
-shape_file = sys.argv[-5]
-shape_synset = sys.argv[-4]
-shape_md5 = sys.argv[-3]
+shape_file = sys.argv[-3]
 shape_view_params_file = sys.argv[-2]
 syn_images_folder = sys.argv[-1]
+shape_file_name = shape_file.split('/')[-1].split('.')[0]
 if not os.path.exists(syn_images_folder):
     os.mkdir(syn_images_folder)
 
@@ -53,7 +50,7 @@ if shape_file[-4:]=='.obj':
     bpy.ops.import_scene.obj(filepath=shape_file)
 if shape_file[-4:]=='.off':
     # install the addon: https://github.com/alextsui05/blender-off-addon 
-    bpy.ops.wm.addon_install(filepath='/mnt/1TB_SSD/qing/blender-off-addon/import_off.py')
+    # bpy.ops.wm.addon_install(filepath='/mnt/1TB_SSD/qing/blender-off-addon/import_off.py')
     bpy.ops.wm.addon_enable(module='import_off')
     bpy.ops.import_mesh.off(filepath=shape_file)
 
@@ -87,18 +84,19 @@ def add_image_to_obj(obj, image_file_path):
     tslot = mat.texture_slots.add()
     tslot.texture = tex
     
-    obj.data.materials.append(mat)
-    
-
-obj_plane = bpy.data.objects["Plane"]
-add_image_to_obj(obj_plane, np.random.choice(texture_imgs))
-
-obj_cylinder = bpy.data.objects["Cylinder"]
-add_image_to_obj(obj_cylinder, np.random.choice(texture_imgs))
-
+    if obj.data.materials:
+        obj.data.materials[0] = mat
+    else:
+        obj.data.materials.append(mat)
 
 # rendering different viewpoints
 for param in view_params:
+    obj_plane = bpy.data.objects["Plane"]
+    add_image_to_obj(obj_plane, np.random.choice(texture_imgs))
+
+    obj_cylinder = bpy.data.objects["Cylinder"]
+    add_image_to_obj(obj_cylinder, np.random.choice(texture_imgs))
+
     azimuth_deg = param[0]
     elevation_deg = param[1]
     theta_deg = param[2]
@@ -126,6 +124,6 @@ for param in view_params:
     camObj.rotation_quaternion[3] = q[3]
     # ** multiply tilt by -1 to match pascal3d annotations **
     theta_deg = (-1*theta_deg)%360
-    syn_image_file = './%s_%s_a%03d_e%03d_t%03d_d%03d.png' % (shape_synset, shape_md5, round(azimuth_deg), round(elevation_deg), round(theta_deg), round(rho))
+    syn_image_file = '%s_a%03d_e%03d_t%03d_d%03d.png' % (shape_file_name, round(azimuth_deg), round(elevation_deg), round(theta_deg), round(rho))
     bpy.data.scenes['Scene'].render.filepath = os.path.join(syn_images_folder, syn_image_file)
     bpy.ops.render.render( write_still=True )
