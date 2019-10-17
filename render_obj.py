@@ -13,12 +13,11 @@ BASE_DIR = osp.dirname(osp.abspath(__file__))
 sys.path.append(BASE_DIR)
 
 blender_executable_path = '/mnt/1TB_SSD/qing/blender-2.79b-linux-glibc219-x86_64/blender'
-blank_file = osp.join(BASE_DIR, 'bg.blend')
+blank_file = osp.join(BASE_DIR, 'sky.blend')
 render_code = 'blender_script.py'
     
 
-def render(model_file, viewpoints):
-    syn_images_folder = osp.join(BASE_DIR, 'images')
+def render(model_file, viewpoints, syn_images_folder):
     # image_name = model_file.split('/')[-3] + '.png'
     image_name = model_file.split('/')[-1].replace('.off','.png')
     print(model_file, image_name)
@@ -75,12 +74,11 @@ if __name__ == '__main__':
     print(len(models))
     
     # viewpoint
-    viewpoint_file = './viewpoints/topdown.txt' 
-    viewpoints = [[float(x) for x in line.rstrip().split(' ')] for line in open(viewpoint_file,'r')]
-    
-    
-    if debug_mode:
-        render(models[0], viewpoints)
-    else:
-        for model_file in models:
-            render(model_file, viewpoints)
+    for model_file in models:
+        model_name = model_file.replace('.off','').split('/')[-1]
+        
+        viewpoint_file = './viewpoints/azi8r10ele1r5_{}.txt'.format(model_name) 
+        viewpoints = [[float(x) for x in line.rstrip().split(' ')] for line in open(viewpoint_file,'r')]
+        syn_images_folder = osp.join(BASE_DIR, 'images_{}'.format(model_name))
+
+        render(model_file, viewpoints, syn_images_folder)

@@ -4,8 +4,7 @@
 This is modified from 
 RenderForCNN/render_pipeline/render_model_views.py by Weichao
 vc-shapenet/blender_script.py by hao su, charles r. qi, yangyan li
-to enable explictly control of lighting, to see the modification
-use git diff.
+to enable explictly control of lighting
 '''
 
 '''
@@ -31,8 +30,8 @@ import sys
 import math
 import random
 import numpy as np
+import glob
 
-# Load rendering light parameters
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(BASE_DIR)
 
@@ -50,10 +49,10 @@ if not os.path.exists(syn_images_folder):
 view_params = [[float(x) for x in line.strip().split(' ')] for line in open(shape_view_params_file).readlines()]
 
 # import the object
-# print(shape_file)
 if shape_file[-4:]=='.obj':
     bpy.ops.import_scene.obj(filepath=shape_file)
 if shape_file[-4:]=='.off':
+    # install the addon: https://github.com/alextsui05/blender-off-addon 
     bpy.ops.wm.addon_install(filepath='/mnt/1TB_SSD/qing/blender-off-addon/import_off.py')
     bpy.ops.wm.addon_enable(module='import_off')
     bpy.ops.import_mesh.off(filepath=shape_file)
@@ -69,12 +68,15 @@ bpy.data.objects['Lamp'].data.energy = 0
 camObj = bpy.data.objects['Camera']
 
 
-# set lights
+# remove default light
 bpy.ops.object.select_all(action='TOGGLE')
 if 'Lamp' in list(bpy.data.objects.keys()):
-    bpy.data.objects['Lamp'].select = True # remove default light
+    bpy.data.objects['Lamp'].select = True
 bpy.ops.object.delete()
 
+
+# add image texture to objects (including floor, background, etc)
+texture_imgs = glob.glob('/mnt/4TB_b/qing/dataset/COCO/train2017/*.jpg')
 def add_image_to_obj(obj, image_file_path):
     obj_name = obj.name
     img = bpy.data.images.load(image_file_path)
@@ -87,17 +89,15 @@ def add_image_to_obj(obj, image_file_path):
     
     obj.data.materials.append(mat)
     
-    
 
 obj_plane = bpy.data.objects["Plane"]
-add_image_to_obj(obj_plane, '/mnt/1TB_SSD/qing/blender_scripts/texture/ILSVRC2014_train_00000008_4.JPEG')
+add_image_to_obj(obj_plane, np.random.choice(texture_imgs))
 
 obj_cylinder = bpy.data.objects["Cylinder"]
-add_image_to_obj(obj_cylinder, '/mnt/1TB_SSD/qing/blender_scripts/texture/ILSVRC2014_train_00000008_4.JPEG')
+add_image_to_obj(obj_cylinder, np.random.choice(texture_imgs))
 
 
-# YOUR CODE START HERE
-
+# rendering different viewpoints
 for param in view_params:
     azimuth_deg = param[0]
     elevation_deg = param[1]
