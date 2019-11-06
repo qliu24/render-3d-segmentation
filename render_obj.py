@@ -10,22 +10,20 @@ blank_file = osp.join(BASE_DIR, 'sky.blend')
 render_code = 'blender_script.py'
     
 
-def render(model_file, viewpoint_file, syn_images_folder):
+def render(model_file, viewpoint_file, syn_images_folder, syn_anno_folder):
     # image_name = model_file.split('/')[-3] + '.png'
     image_name = model_file.split('/')[-1].replace('.off','.png')
     print(model_file, image_name)
-    if not osp.exists(syn_images_folder):
-        os.mkdir(syn_images_folder)
 
     # run code
-
-    render_cmd = '%s %s --background --python %s -- %s %s %s' % (
+    render_cmd = '%s %s --background --python %s -- %s %s %s %s' % (
         blender_executable_path, 
         blank_file, 
         render_code, 
         model_file,
         viewpoint_file, 
-        syn_images_folder
+        syn_images_folder,
+        syn_anno_folder
     )
     try:
         print(render_cmd)
@@ -44,7 +42,7 @@ if __name__ == '__main__':
     
     # model_dir = '/mnt/1TB_SSD/qing/vc-shapenet/examples/car/*/models/model_normalized.obj'
     # model_dir = '/mnt/1TB_SSD/qing/blender_scripts/PASCAL3D+_obj/01r.obj'
-    model_dir = '/mnt/1TB_SSD/qing/blender_scripts/PASCAL3D+_obj/01.off'
+    model_dir = '/mnt/1TB_SSD/qing/blender_scripts/PASCAL3D+_obj/*.off'
     print(model_dir)
     models = glob.glob(model_dir)
     print(len(models))
@@ -55,4 +53,5 @@ if __name__ == '__main__':
         
         viewpoint_file = './viewpoints/azi8r10ele1r5_{}.txt'.format(model_name) 
         syn_images_folder = osp.join(BASE_DIR, 'images')
-        render(model_file, viewpoint_file, syn_images_folder)
+        syn_anno_folder = osp.join(BASE_DIR, 'annotations')
+        render(model_file, viewpoint_file, syn_images_folder, syn_anno_folder)
