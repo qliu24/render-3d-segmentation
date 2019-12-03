@@ -1,8 +1,21 @@
 import os, sys, random, math
 import bpy
 import numpy as np
+import bpy_extras
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(BASE_DIR)
+
+# function for projecting 3d keypoints to 2d img
+def project_by_object_utils(cam, point):
+    scene = bpy.context.scene
+    co_2d = bpy_extras.object_utils.world_to_camera_view(scene, cam, point)
+    render_scale = scene.render.resolution_percentage / 100
+    render_size = (
+            int(scene.render.resolution_x * render_scale),
+            int(scene.render.resolution_y * render_scale),
+            )
+    return (co_2d.x * render_size[0], render_size[1] - co_2d.y * render_size[1], co_2d.z)
 
 
 def camPosToQuaternion(cx, cy, cz):
@@ -104,18 +117,14 @@ def obj_centened_camera_pos(dist, azimuth_deg, elevation_deg):
     z = (dist * math.sin(phi))
     return (x, y, z)
 
-def setup_lighting():
+def setup_lighting(use_environment_light = None, use_sun_light = 0.5, use_additional_light = True, use_point_light = False, loc=None):
     
     bpy.context.scene.world.light_settings.use_environment_light = False
     
-    use_environment_light = False
-    use_sun_light = True
-    use_additional_light = True
-    use_point_light = False
-    
     if use_environment_light:
-        light_environment_energy_lowbound = 0.9
-        light_environment_energy_highbound = 0.3
+        # use_environment_light = [0.9, 0.3]
+        light_environment_energy_lowbound = use_environment_light[0]
+        light_environment_energy_highbound = use_environment_light[1]
         
         bpy.context.scene.world.light_settings.use_environment_light = True
         env_lighting = np.random.uniform(light_environment_energy_lowbound, light_environment_energy_highbound)
@@ -124,8 +133,13 @@ def setup_lighting():
     
     if use_sun_light:
         # Add a sky lighting
-        bpy.ops.object.lamp_add(type='SUN', view_align = False, location=(0, 0, 1))
-        bpy.data.objects['Sun'].data.energy = 0.5 
+        # use_sun_light = 0.7
+        if loc:
+            bpy.ops.object.lamp_add(type='SUN', view_align = False, location=loc)
+        else:
+            bpy.ops.object.lamp_add(type='SUN', view_align = False, location=(0, 0, 1))
+        bpy.data.objects['Sun'].data.energy = use_sun_light
+        
         
     if use_additional_light:
         light_num_lowbound = 3
@@ -136,8 +150,8 @@ def setup_lighting():
         light_elevation_degree_lowbound = 20
         light_elevation_degree_highbound = 50
         
-        light_energy_mean = 0.1
-        light_energy_std = 0.03
+        light_energy_mean = 0.01
+        light_energy_std = 0.001
         
         num_of_light = random.randint(light_num_lowbound,light_num_highbound)
         binsize = 360/num_of_light

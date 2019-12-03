@@ -25,7 +25,6 @@ author: Qing Liu
 
 import os
 import bpy
-import bpy_extras
 import sys
 import math
 import random
@@ -140,17 +139,6 @@ for kk in keypoint_list:
 
     keypoints.append(vert_ls)
     
-    
-# function for projecting 3d keypoints to 2d img
-def project_by_object_utils(cam, point):
-    scene = bpy.context.scene
-    co_2d = bpy_extras.object_utils.world_to_camera_view(scene, cam, point)
-    render_scale = scene.render.resolution_percentage / 100
-    render_size = (
-            int(scene.render.resolution_x * render_scale),
-            int(scene.render.resolution_y * render_scale),
-            )
-    return (co_2d.x * render_size[0], render_size[1] - co_2d.y * render_size[1])
 
 # rendering different viewpoints
 for param in view_params:
@@ -198,7 +186,7 @@ for param in view_params:
     for kk in keypoints:
         pos_kk = []
         for vv in kk:
-            px, py = project_by_object_utils(camObj, vv)
+            px, py, _ = opt.project_by_object_utils(camObj, vv)
             pos_kk.append([px, py])
             
         loc_keypoints.append(pos_kk)
