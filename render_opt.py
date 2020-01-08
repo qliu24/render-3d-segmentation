@@ -2,6 +2,7 @@ import os, sys, random, math
 import bpy
 import numpy as np
 import bpy_extras
+from mathutils import Matrix
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(BASE_DIR)
@@ -16,6 +17,58 @@ def project_by_object_utils(cam, point):
             int(scene.render.resolution_y * render_scale),
             )
     return (co_2d.x * render_size[0], render_size[1] - co_2d.y * render_size[1], co_2d.z)
+
+
+def get_calibration_matrix_K_from_blender(camd):
+    f_in_mm = camd.lens
+    scene = bpy.context.scene
+    resolution_x_in_px = scene.render.resolution_x
+    resolution_y_in_px = scene.render.resolution_y
+    scale = scene.render.resolution_percentage / 100
+    sensor_width_in_mm = camd.sensor_width
+    sensor_height_in_mm = camd.sensor_height
+    pixel_aspect_ratio = scene.render.pixel_aspect_x / scene.render.pixel_aspect_y
+    if (camd.sensor_fit == 'VERTICAL'):
+        # the sensor height is fixed (sensor fit is horizontal), 
+        # the sensor width is effectively changed with the pixel aspect ratio
+        s_u = resolution_x_in_px * scale / sensor_width_in_mm / pixel_aspect_ratio 
+        s_v = resolution_y_in_px * scale / sensor_height_in_mm
+    else: # 'HORIZONTAL' and 'AUTO'
+        # the sensor width is fixed (sensor fit is horizontal), 
+        # the sensor height is effectively changed with the pixel aspect ratio
+        pixel_aspect_ratio = scene.render.pixel_aspect_x / scene.render.pixel_aspect_y
+        s_u = resolution_x_in_px * scale / sensor_width_in_mm
+        s_v = resolution_y_in_px * scale * pixel_aspect_ratio / sensor_height_in_mm
+
+    # Parameters of intrinsic calibration matrix K
+    alpha_u = f_in_mm * s_u
+    alpha_v = f_in_mm * s_v
+    u_0 = resolution_x_in_px*scale / 2
+    v_0 = resolution_y_in_px*scale / 2
+    skew = 0 # only use rectangular pixels
+
+    K = Matrix(
+        ((alpha_u, skew,    u_0),
+        (    0  ,  alpha_v, v_0),
+        (    0  ,    0,      1 )))
+    return K
+
+
+# function for adding image to object surface
+def add_image_to_obj(obj, image_file_path):    
+    obj_name = obj.name
+    img = bpy.data.images.load(image_file_path)
+    tex = bpy.data.textures.new("tex_"+obj_name, 'IMAGE')
+    tex.image=img
+
+    mat = bpy.data.materials.new("mat_"+obj_name)
+    tslot = mat.texture_slots.add()
+    tslot.texture = tex
+    
+    if obj.data.materials:
+        obj.data.materials[0] = mat
+    else:
+        obj.data.materials.append(mat)
 
 
 def camPosToQuaternion(cx, cy, cz):
@@ -116,6 +169,8 @@ def obj_centened_camera_pos(dist, azimuth_deg, elevation_deg):
     y = (dist * math.sin(theta) * math.cos(phi))
     z = (dist * math.sin(phi))
     return (x, y, z)
+
+# def obj_camera_pos2(x,y,z, )
 
 def setup_lighting(use_environment_light = None, use_sun_light = 0.5, use_additional_light = True, use_point_light = False, loc=None):
     

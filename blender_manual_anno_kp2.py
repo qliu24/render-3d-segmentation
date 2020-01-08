@@ -173,6 +173,4 @@ for param in view_params:
         pickle.dump(loc_keypoints, fh)
     
     
-# K = opt.get_calibration_matrix_K_from_blender(camObj.data)
-# print(K)
     

@@ -5,10 +5,9 @@ blender_hand_anno_parts.py
 brief:
     render projections of a 3D model and its hand annotated parts from viewpoints specified by an input parameter file
 usage:
-	blender blank.blend --background --python blender_hand_anno_parts.py -- <img_savedir> <anno_savedir> <model_id> <model_dir> <anno_dir> <par_file>
+	blender blank.blend --background --python blender_hand_anno_parts.py -- <anno_savedir> <model_id> <model_dir> <anno_dir> <par_file>
 
 inputs:
-       <img_savedir>: path to save images
        <anno_savedir>: path to save the depth maps
        <model_id>: shapenet model id
        <model_dir>: path to shapenet model files
@@ -35,19 +34,14 @@ sys.path.append(BASE_DIR)
 
 def main():
     # Input parameters
-    img_savedir = sys.argv[-6]
     anno_savedir = sys.argv[-5]
     model_id = sys.argv[-4]
     model_dir = sys.argv[-3]
     anno_dir = sys.argv[-2]
     par_file = sys.argv[-1]
 
-    part_list_file = '/mnt/1TB_SSD/qing/blender_scripts/car_models/part_list.txt'
-    part_list = [line.strip() for line in open(part_list_file).readlines()]
-
-
-    if not os.path.exists(img_savedir):
-        os.mkdir(img_savedir)
+    # part_list_file = '/mnt/1TB_SSD/qing/blender_scripts/car_models/part_list.txt'
+    # part_list = [line.strip() for line in open(part_list_file).readlines()]
 
     if not os.path.exists(anno_savedir):
         os.mkdir(anno_savedir)
@@ -55,7 +49,7 @@ def main():
     view_params = [[float(x) for x in line.strip().split(' ')] for line in open(par_file).readlines()]
 
     bpy.context.scene.render.alpha_mode = 'TRANSPARENT'
-    
+    bpy.data.scenes['Scene'].render.resolution_percentage = 100
     #switch on nodes
     scene = bpy.data.scenes['Scene']
     scene.render.use_compositing = True
@@ -70,31 +64,20 @@ def main():
     # create input render layer node
     rl = tree.nodes.new('CompositorNodeRLayers')
     comp = tree.nodes.new('CompositorNodeComposite')
-
-    # create mapvalue node
-    mv = tree.nodes.new('CompositorNodeMapValue') 
-    mv.offset[0] = 0
-    mv.size[0] = 0.1
-    mv.use_min = True
-    mv.min[0] = 0
-    mv.use_max = True
-    mv.max[0] = 255
-
-    # Links
-    links.new(rl.outputs[2], mv.inputs[0])  # link Renger Image to Viewer Image
-    links.new(rl.outputs[1], comp.inputs[1])  # alpha channel
-    links.new(mv.outputs[0], comp.inputs[0])
+    links.new(rl.outputs[2], comp.inputs[0])
+    
+    scene.render.image_settings.file_format = 'OPEN_EXR' # set the format. the extension should be exr?
     
     # render the depth maps of the whole object
-    shape_file = os.path.join(anno_dir,'car_models_hand_annotated','model_normalized.obj')
-    syn_image_file_template = os.path.join(anno_savedir, model_id+'_a{:03d}_e{:03d}_t{:03d}_d{:03d}.png')
+    shape_file = os.path.join(anno_dir,'car_models_hand_annotated', model_id, 'model_normalized.obj')
+    syn_image_file_template = os.path.join(anno_savedir, model_id+'_a{:03d}_e{:03d}_t{:03d}_d{:03d}.exr')
     render_obj(view_params, shape_file, syn_image_file_template)
     
     # render the depth map of the annotated parts
-    for part_idx in range(len(part_list)):
-        shape_file = os.path.join(anno_dir, 'car_models_hand_annotated','{}_{}.obj'.format(model_id, part_list[part_idx]))
-        syn_image_file_template = os.path.join(anno_savedir, model_id+'_a{:03d}_e{:03d}_t{:03d}_d{:03d}_'+str(part_idx)+'.png')
-        render_obj(view_params, shape_file, syn_image_file_template)
+    # for part_idx in range(len(part_list)):
+    #     shape_file = os.path.join(anno_dir, 'car_models_hand_annotated','{}_{}.obj'.format(model_id, part_list[part_idx]))
+    #     syn_image_file_template = os.path.join(anno_savedir, model_id+'_a{:03d}_e{:03d}_t{:03d}_d{:03d}_'+str(part_idx)+'.exr')
+    #     render_obj(view_params, shape_file, syn_image_file_template)
 
 
 # function for rendering depth maps
@@ -134,8 +117,7 @@ def render_obj(view_params, shape_file, syn_image_file_template):
         theta_deg = (-1*theta_deg)%360
 
         # render depth map of the object
-        # syn_image_file = '%s_a%03d_e%03d_t%03d_d%03d.png' % (model_id, round(azimuth_deg), round(elevation_deg), round(theta_deg), round(rho))
-        syn_image_file = syn_image_file_template.format(round(azimuth_deg), round(elevation_deg), round(theta_deg), round(rho))
+        syn_image_file = syn_image_file_template.format(round(azimuth_deg), round(elevation_deg), round(theta_deg), round(rho*100))
         bpy.data.scenes['Scene'].render.filepath = syn_image_file
         bpy.ops.render.render(write_still=True)
 
