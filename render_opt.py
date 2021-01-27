@@ -170,8 +170,64 @@ def obj_centened_camera_pos(dist, azimuth_deg, elevation_deg):
     z = (dist * math.sin(phi))
     return (x, y, z)
 
-# def obj_camera_pos2(x,y,z, )
 
+def use_sun_light(energy, loc=None):
+    if not(loc is None):
+        bpy.ops.object.lamp_add(type='SUN', view_align = False, location=loc)
+    else:
+        bpy.ops.object.lamp_add(type='SUN', view_align = False, location=(0, 0, 1))
+        
+    bpy.data.objects['Sun'].data.energy = energy
+    
+def use_point_light(energy, loc=None):
+    if isinstance(loc[0], (list, tuple)):
+        for ll in loc:
+            bpy.ops.object.lamp_add(type='POINT', view_align = False, location=ll)
+    else:
+        bpy.ops.object.lamp_add(type='POINT', view_align = False, location=loc)
+        
+    for ob in bpy.context.scene.objects:
+        if not ob.type == 'LAMP':
+            continue
+        lamp = ob.data
+        if lamp.name.lower().startswith("point"):
+            lamp.energy = energy
+    
+    
+def setup_random_lighting(camera_loc):
+    bpy.context.scene.world.light_settings.use_environment_light = False
+    
+    # setup sun
+    bpy.ops.object.lamp_add(type='SUN', view_align = False, location=camera_loc)
+    bpy.data.objects['Sun'].data.energy = np.random.uniform(0.3,1.0)
+    
+    # setup point light
+    light_num_lowbound = 0
+    light_num_highbound = 4
+    
+    light_elevation_degree_lowbound = 20
+    light_elevation_degree_highbound = 60
+
+    light_energy_mean = 0.5
+    light_energy_std = 0.1
+        
+    num_of_light = np.random.randint(light_num_lowbound,light_num_highbound)
+    if num_of_light>0:
+        binsize = 360/num_of_light
+        start_azimuth_degree = 0
+        for _ in range(num_of_light):
+            light_azimuth_degree_lowbound = start_azimuth_degree
+            light_azimuth_degree_highbound = start_azimuth_degree+binsize
+            light_azimuth_deg = np.random.uniform(light_azimuth_degree_lowbound, light_azimuth_degree_highbound)
+            light_elevation_deg  = np.random.uniform(light_elevation_degree_lowbound, light_elevation_degree_highbound)
+            light_dist = 4
+            lx, ly, lz = obj_centened_camera_pos(light_dist, light_azimuth_deg, light_elevation_deg)
+            bpy.ops.object.lamp_add(type='POINT', view_align = False, location=(lx, ly, lz))
+            bpy.data.objects['Point'].data.energy = np.random.normal(light_energy_mean, light_energy_std)
+            start_azimuth_degree = start_azimuth_degree+binsize
+    
+    
+    
 def setup_lighting(use_environment_light = None, use_sun_light = 0.5, use_additional_light = True, use_point_light = False, loc=None):
     
     bpy.context.scene.world.light_settings.use_environment_light = False
@@ -193,8 +249,8 @@ def setup_lighting(use_environment_light = None, use_sun_light = 0.5, use_additi
             bpy.ops.object.lamp_add(type='SUN', view_align = False, location=loc)
         else:
             bpy.ops.object.lamp_add(type='SUN', view_align = False, location=(0, 0, 1))
+            
         bpy.data.objects['Sun'].data.energy = use_sun_light
-        
         
     if use_additional_light:
         light_num_lowbound = 3
@@ -221,6 +277,7 @@ def setup_lighting(use_environment_light = None, use_sun_light = 0.5, use_additi
             lx, ly, lz = obj_centened_camera_pos(light_dist, light_azimuth_deg, light_elevation_deg)
             bpy.ops.object.lamp_add(type='POINT', view_align = False, location=(lx, ly, lz))
             bpy.data.objects['Point'].data.energy = np.random.normal(light_energy_mean, light_energy_std)
+            start_azimuth_degree = start_azimuth_degree+binsize
 
     if use_point_light:
         light_num_lowbound = 2
