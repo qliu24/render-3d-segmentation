@@ -1,13 +1,7 @@
 /*
 !.gitignore
 !README.md
-
 !*.py
 !*.blend
-
+!*.ini
 !viewpoints/
-!PASCAL3D+_obj/
-PASCAL3D+_obj/*
-!texture/
-texture/*
-

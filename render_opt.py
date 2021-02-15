@@ -205,7 +205,8 @@ def setup_random_lighting(camera_loc):
     light_num_lowbound = 0
     light_num_highbound = 4
     
-    light_elevation_degree_lowbound = 20
+#     light_elevation_degree_lowbound = 20
+    light_elevation_degree_lowbound = -20
     light_elevation_degree_highbound = 60
 
     light_energy_mean = 0.5
