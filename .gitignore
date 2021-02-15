@@ -1,7 +1,10 @@
 /*
 !.gitignore
 !README.md
-!*.py
-!*.blend
-!*.ini
 !viewpoints/
+!env/
+!render_shapenet_demo/
+!render_seg/
+render_seg/*.log
+!render_image_kp/
+render_image_kp/*.log
