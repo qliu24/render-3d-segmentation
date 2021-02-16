@@ -145,7 +145,7 @@ def main(model_id, par_file, config_file):
         if cz < -1:
             obj_plane.location = [0,0,-4]
         else:
-            obj_plane.location = [0,0,-1]
+            obj_plane.location = [0,0,-0.4]
         
         q1 = opt.camPosToQuaternion(cx, cy, cz)
         q2 = opt.camRotQuaternion(cx, cy, cz, theta_deg)

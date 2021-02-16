@@ -29,7 +29,7 @@ def render(model_id, par_file, cfg_path):
         
 
 if __name__ == '__main__':
-    obj_class = 'aeroplane'
+    obj_class = 'bus'
     cfg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),'config_{}.ini'.format(obj_class))
     project_root_dir = '/mnt/1TB_SSD/qing/blender_scripts/'
     
@@ -45,13 +45,18 @@ if __name__ == '__main__':
 #            'scooter':'5131b742dad94f6175dadc997718614d',
 #            'dirtbike':'db5b6c2f64fefe5b448c90b3a2fec4b8'}
 
-    model_dic={'airliner':'10e4331c34d610dacc14f1e6f4f4f49b',
-               'jet':'5cf29113582e718171d03b466c72ce41',
-               'fighter':'b0b164107a27986961f6e1cef6b8e434',
-               'biplane':'17c86b46990b54b65578b8865797aa0'}
+#     model_dic={'airliner':'10e4331c34d610dacc14f1e6f4f4f49b',
+#                'jet':'5cf29113582e718171d03b466c72ce41',
+#                'fighter':'b0b164107a27986961f6e1cef6b8e434',
+#                'biplane':'17c86b46990b54b65578b8865797aa0'}
+
+    model_dic={'school':'79e32e66bbf04191afe1d4530f4c6e24',
+               'regular':'4ead9b28515b97fdc0e2e9e9ade4d03b',
+               'double':'3080d86e8424187d4d44f5db04bf14b8',
+               'articulated':'1821df0ce1bf2cea52470de2774d6099'}
     
     for model_key in model_dic.keys():
         model_id = model_dic[model_key]
-        par_file = osp.join(project_root_dir, 'viewpoints', 'dataset', 'dataset_{}_p.txt'.format(model_key))
+        par_file = osp.join(project_root_dir, 'viewpoints', 'dataset', 'dataset_{}.txt'.format(model_key))
         render(model_id, par_file, cfg_path)
         
