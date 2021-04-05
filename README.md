@@ -11,7 +11,7 @@ CGPart is a comprehensive part segmentation dataset that provides detailed annot
 ### Usage
 
 #### Step1: Download the annotated 3D CAD models and setup the config files
-* The annotated 3D CAD models can be downloaded [here](https://cs.jhu.edu/~qliu24/CGPart/cgpart_3d.zip).
+* Download the annotated 3D CAD models from [here](https://cs.jhu.edu/~qliu24/CGPart/cgpart_3d.zip)
 * Edit the config files in *render_image_kp* folder to have correct data locations
 
 #### Step2: Render the images (with keypoint annotations)
