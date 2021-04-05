@@ -1,6 +1,40 @@
-# Render Synthetic Images with Part Annotations Using CGPart
-CGPart is a comprehensive part segmentation dataset that provides detailed annotations on 3D CAD models, synthetic images, and real test images. 
+## Render Synthetic Images with Part Segmentation Annotations Using CGPart
+CGPart is a comprehensive part segmentation dataset that provides detailed annotations on 3D CAD models, synthetic images, and real test images. It involves 5 vehicle categories: *car*, *motorbike*, *aeroplane*, *bus*, and *bicycle*. Below are some example segmentation annotations from the dataset. You can find more information about CGPart from this [page](https://qliu24.github.io/cgpart/) or from our [paper](https://arxiv.org/abs/2103.14098).  
+  
+<img src="https://qliu24.github.io/cgpart/images/cgpart_overview.jpg" alt="cgpart_overview" width="750"/>
 
+### Requirements
+
+* Blender 2.79b
+* Python 3, opencv-python 
+  
+### Usage
+
+#### Step1: Download the annotated 3D CAD models and setup the config files
+* The annotated 3D CAD models can be downloaded [here](https://cs.jhu.edu/~qliu24/CGPart/cgpart_3d.zip).
+* Edit the config files in *render_image_kp* folder to have correct data locations
+
+#### Step2: Render the images (with keypoint annotations)
+* Run the *render_image_kp/render_manual_anno_kp.py* with proper arguments to generate the synthetic images, for example:
+```
+cd render_image_kp
+python render_manual_anno_kp.py --obj_cls car --model_id 6710c87e34056a29aa69dfdc5532bb13
+```
+
+#### Step3: Render the depth maps and convert them into segmentation maps
+* Run the *render_seg/render_manual_anno_parts.py* with proper arguments to generate the depth maps, for example:
+```
+cd render_seg
+python render_manual_anno_parts.py --obj_cls car --model_id 6710c87e34056a29aa69dfdc5532bb13
+```
+
+Then run the *render_seg/depth_to_semseg.py* with proper arguments to generate the segmentation maps, for example:
+```
+python depth_to_semseg.py --obj_cls car --model_key sedan
+```
+
+#### Step4 (optional): visualize the results
+Example code is given in the *visualization.ipynb* notebook.
 
 If you find this project helpful, please consider citing our paper.
 ```
