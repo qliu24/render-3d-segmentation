@@ -5,16 +5,12 @@ blender_manual_anno_kp.py
 brief:
     render projections of a 3D model and its manually annotated keypoints from viewpoints specified by an input parameter file
 usage:
-	blender blank.blend --background --python blender_manual_anno_kp.py -- <surface_color> <img_savedir> <anno_savedir> <model_id> <model_dir> <anno_dir> <par_file>
+	blender blank.blend --background --python blender_manual_anno_kp.py -- -m <model_id> -p <par_file> -c <cfg_file>
 
 inputs:
-       <surface_color>: one of ['random_color', 'random_pic', 'plain', 'white', 'black', 'red', 'green', 'blue']
-       <img_savedir>: path to save images
-       <anno_savedir>: path to save the keypoints
        <model_id>: shapenet model id
-       <model_dir>: path to shapenet model files
-       <anno_dir>: path to annotated keypoints .txt files
        <par_file>: txt file - each line is '<azimith angle> <elevation angle> <in-plane rotation angle> <distance>'
+       <cfg_file>: configuration file
 author: Qing Liu
 '''
 
@@ -67,8 +63,8 @@ def main(model_id, par_file, config_file):
     bpy.data.scenes['Scene'].render.resolution_percentage = 100
     camObj = bpy.data.objects['Camera']
 
-    obj_plane = bpy.data.objects["Plane"]
-    obj_cylinder = bpy.data.objects["Cylinder"]
+#     obj_plane = bpy.data.objects["Plane"]
+#     obj_cylinder = bpy.data.objects["Cylinder"]
 
     # import the object
     shape_file = os.path.join(model_dir, model_id, 'models', 'model_normalized.obj')
@@ -118,12 +114,12 @@ def main(model_id, par_file, config_file):
 
     for param in view_params:
         if surface=='random_pic':
-            opt.add_image_to_obj(obj_plane, np.random.choice(texture_imgs))
-            opt.add_image_to_obj(obj_cylinder, np.random.choice(texture_imgs))
+#             opt.add_image_to_obj(obj_plane, np.random.choice(texture_imgs))
+#             opt.add_image_to_obj(obj_cylinder, np.random.choice(texture_imgs))
             opt.add_image_to_obj(obj_car, np.random.choice(texture_imgs))
         elif surface=='random_color':
-            opt.add_image_to_obj(obj_plane, np.random.choice(texture_imgs))
-            opt.add_image_to_obj(obj_cylinder, np.random.choice(texture_imgs))
+#             opt.add_image_to_obj(obj_plane, np.random.choice(texture_imgs))
+#             opt.add_image_to_obj(obj_cylinder, np.random.choice(texture_imgs))
             
             for mm in mtl_ls:
                 r_color=np.random.random(size=(3,))
@@ -142,10 +138,11 @@ def main(model_id, par_file, config_file):
             rho -= 1
             
         cx, cy, cz = opt.obj_centened_camera_pos(rho, azimuth_deg, elevation_deg)
-        if cz < -1:
-            obj_plane.location = [0,0,-4]
-        else:
-            obj_plane.location = [0,0,-0.4]
+        # adjust plane position given viewpoint
+#         if cz < -1:
+#             obj_plane.location = [0,0,-4]
+#         else:
+#             obj_plane.location = [0,0,-0.4]
         
         q1 = opt.camPosToQuaternion(cx, cy, cz)
         q2 = opt.camRotQuaternion(cx, cy, cz, theta_deg)
@@ -164,8 +161,11 @@ def main(model_id, par_file, config_file):
         bpy.ops.object.delete(use_global=False)
 
         # set environment lighting
-        #bpy.context.space_data.context = 'WORLD'
-        opt.setup_random_lighting((cx, cy, cz+0.2))
+        # random lighting
+#         opt.setup_random_lighting((cx, cy, cz+0.2))
+        # fix lighting
+        loc1 = (cx*10, cy*10, (cz-0.05)*10)
+        opt.use_sun_light(energy=1, loc=loc1)
 
         # ** multiply tilt by -1 to match pascal3d annotations **
         theta_deg = (-1*theta_deg)%360
@@ -186,17 +186,13 @@ def main(model_id, par_file, config_file):
         syn_anno_file = syn_image_file.replace('.png','.pkl')
         with open(os.path.join(anno_savedir, syn_anno_file), 'wb') as fh:
             pickle.dump(loc_keypoints, fh)
-
-
-    # K = opt.get_calibration_matrix_K_from_blender(camObj.data)
-    # print(K)
     
 if __name__ == '__main__':
     argv = sys.argv[sys.argv.index("--") + 1:]
     parser = argparse.ArgumentParser(
         description='blender rendering code with keypoints.')
     parser.add_argument('-m', '--shapenet_model_id',
-                        type=str, help='Name of the shapenet model')
+                        type=str, help='shapenet model id')
     parser.add_argument('-p', '--vp_par_file',
                         type=str, help='path to the viewpoint parameter file')
     parser.add_argument('-c', '--config_file', 

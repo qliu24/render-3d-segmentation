@@ -11,7 +11,7 @@ inputs:
        <anno_savedir>: path to save the depth maps
        <model_id>: shapenet model id
        <model_dir>: path to shapenet model files
-       <anno_dir>: path to hand annotated part .obj files
+       <anno_dir>: path to annotated part .obj files
        <par_file>: txt file - each line is '<azimith angle> <elevation angle> <in-plane rotation angle> <distance>'
 author: Qing Liu
 '''
@@ -116,10 +116,6 @@ def render_obj(view_params, shape_file, syn_image_file_template):
         # clear default lights
         bpy.ops.object.select_by_type(type='LAMP')
         bpy.ops.object.delete(use_global=False)
-
-        # set environment lighting
-        #bpy.context.space_data.context = 'WORLD'
-        opt.setup_lighting(use_sun_light=1, use_additional_light=False, loc=(cx, cy, cz-0.2))
 
         # ** multiply tilt by -1 to match pascal3d annotations **
         theta_deg = (-1*theta_deg)%360
