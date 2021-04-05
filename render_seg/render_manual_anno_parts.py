@@ -13,7 +13,7 @@ parser.add_argument('--vp_file', type=str, default='round.txt',
                     help='filename for viewpoint parameters')
 parser.add_argument('--bg_file', type=str, default='blank.blend',
                     help='filename for blender environment file')
-parser.add_argument('--data_dir', type=str, default='/mnt/4TB_b/qing/3DComputerGraphicsPart/',
+parser.add_argument('--data_dir', type=str, default='../CGPart/',
                     help='path to folder that contains shapenet models and part.obj files')
 parser.add_argument('--save_dir', type=str, default='../demo/')
 args = parser.parse_args()
