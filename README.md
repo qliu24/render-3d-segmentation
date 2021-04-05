@@ -20,6 +20,11 @@ CGPart is a comprehensive part segmentation dataset that provides detailed annot
 cd render_image_kp
 python render_manual_anno_kp.py --obj_cls car --model_id 6710c87e34056a29aa69dfdc5532bb13
 ```
+* To randomize the render parameters:
+  * Generate randomized viewpoint parameter files and put it in the *viewpoints* folder, then use it through the *--vp_file* argument.
+  * Modify the config files and use *surface = random_pic* or *surface = random_color* to randomize the object surface/texture.
+  * Set *--bg_file sky.blend* and uncomment the related lines in *render_image_kp/blender_manual_anno_kp.py* (L66-67, L117-118, L121-122, L142-145) to randomize the background.
+  * Uncomment *render_image_kp/blender_manual_anno_kp.py* L165 and comment the L167-168 to randomize the lighting.
 
 #### Step3: Render the depth maps and convert them into segmentation maps
 * Run the *render_seg/render_manual_anno_parts.py* with proper arguments to generate the depth maps, for example:
@@ -33,9 +38,10 @@ Then run the *render_seg/depth_to_semseg.py* with proper arguments to generate t
 python depth_to_semseg.py --obj_cls car --model_key sedan
 ```
 
-#### Step4 (optional): visualize the results
+#### Step4 (optional): Visualize the results
 Example code is given in the *visualization.ipynb* notebook.
 
+### Citation
 If you find this project helpful, please consider citing our paper.
 ```
 @article{liu2019semantic,
