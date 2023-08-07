@@ -1,7 +1,7 @@
 ## Render Synthetic Images with Part Segmentation Annotations Using CGPart
 CGPart is a comprehensive part segmentation dataset that provides detailed annotations on 3D CAD models, synthetic images, and real test images. It involves 5 vehicle categories: *car*, *motorbike*, *aeroplane*, *bus*, and *bicycle*. Below are some example segmentation annotations from the dataset. You can find more information about CGPart from this [page](https://qliu24.github.io/cgpart/) or from our [paper](https://arxiv.org/abs/2103.14098).  
   
-<img src="[https://qliu24.github.io/cgpart/images/cgpart_overview.jpg](https://github.com/qliu24/udapart/blob/gh-pages/images/cgpart_overview.jpg)" alt="cgpart_overview" width="750"/>
+<img src="[https://qliu24.github.io/udapart/images/cgpart_overview.jpg](https://github.com/qliu24/udapart/blob/gh-pages/images/cgpart_overview.jpg)" alt="cgpart_overview" width="750"/>
 
 ### Requirements
 
